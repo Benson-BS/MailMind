@@ -2,14 +2,14 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from typing import List, Dict
-from src.tools.register import Tool_Register
+
 load_dotenv()
 
 client = OpenAI(
     api_key=os.getenv('deepseek_api_key'),
     base_url="https://api.deepseek.com",
     # Brotli 1.0.9 in this environment cannot decode httpx2's Brotli responses.
-    default_headers={"Accept-Encoding": "gzip, deflate"},
+    
 )
 
 
@@ -17,15 +17,15 @@ class LLM():
     def __init__(self):
         self.lm = client
     
-    def __call__(self, messages: List[Dict]) -> str:
+    def __call__(self, messages: List[Dict], tools=None) -> str:
         response = self.lm.chat.completions.create(
             model = "deepseek-chat",
-            messages = messages
+            messages = messages,
             tools = tools
         )
         
         return response.choices[0].message.content
-tools = Tool_Register()  
+ 
 lm = LLM()
 
 if __name__ == "__main__":
