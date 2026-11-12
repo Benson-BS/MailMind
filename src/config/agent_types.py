@@ -1,5 +1,22 @@
 from dataclasses import dataclass
-from typing import Literal, Callable, Any
+from typing import Literal, Callable, Any, TypedDict, Optional
+
+
+class Email(TypedDict):
+    """One email from data/emails/emails.jsonl, as a plain dict:
+    email["subject"], email["from"], email["to"]."""
+
+    id: str  # "em-00001"
+    thread_id: str  # "th-00001"
+    reply_to: Optional[str]  # id of the email this one replies to, or None
+    # "from" is also a key (it is a Python keyword, so it cannot be declared here).
+    to: list[str]
+    date: str  # ISO 8601, UTC, e.g. "2001-05-14T23:39:00Z"
+    subject: str
+    body: str
+    
+    
+    
 @dataclass
 class Tool_DESC:
     name: str
