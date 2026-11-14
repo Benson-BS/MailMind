@@ -1,19 +1,31 @@
 from src.config.agent_types import Email
 import re
-from src.config.model import client
+
 from openai import OpenAI
+system_prompt = (
+    "从收件人的角度判断邮件优先级。"
+    "ignore：广告、新闻简报、全员通知，或不需要收件人处理的自动通知；"
+    "即使措辞紧急，也归为 ignore。"
+    "urgent：明确需要该收件人处理，且期限是当天、下一个工作日，"
+    "或不超过两个工作日。"
+    "normal：其他写给该收件人、值得阅读的工作或私人邮件。"
+    "第一行只输出 urgent、normal 或 ignore；第二行输出原因。"
+)
 def classify_email(email: Email, lm: OpenAI) -> dict:
-    content = email['body']
+    content = (
+        f"日期：{email['date']}\n"
+        f"发件人：{email['from']}\n"
+        f"收件人：{', '.join(email['to'])}\n"
+        f"主题：{email['subject']}\n"
+        f"正文：{email['body']}"
+    )
     res = {"category": "", "reason": ""}
-    response = client.chat.completions.create(
+    response = lm.chat.completions.create(
         model = 'deepseek-chat',
         messages = [
             {
                 "role": "system",
-                "content": (
-                    "根据邮件内容分类。第一行只输出 urgent、normal、ignore、unknown "
-                    "之一，第二行输出原因。"
-                ),
+                "content": system_prompt
             },
             {"role": "user", "content": content},
         ],  
