@@ -10,6 +10,6 @@ def load_emails() -> List[Email]:
     with open("data/emails/emails.jsonl", "r", encoding="utf-8") as file:
         for line in file:
             if line.strip():
-                emails.append(Email, json.loads(line))
+                emails.append(json.loads(line))
 
     return emails
