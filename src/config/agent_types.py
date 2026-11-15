@@ -14,8 +14,35 @@ class Email(TypedDict):
     date: str  # ISO 8601, UTC, e.g. "2001-05-14T23:39:00Z"
     subject: str
     body: str
-    
-    
+
+@dataclass
+class DocWindow:
+    doc_id: str
+    start_line: int  # 1-based line number of the first line in `text`
+    end_line: int  # 1-based line number of the last line in `text`
+    total_lines: int
+    text: str
+
+@dataclass
+class BM25Index:
+    postings: dict[str, list[tuple[int, int]]]
+    lengths: list[int]
+    average_length: float
+'''
+docs = ["apple apple banana", "banana orange"]
+postings = {
+    "apple": [(0, 2)],
+    "banana": [(0, 1), (1, 1)],
+    "orange": [(1, 1)],
+}
+lengths = [3, 2]
+average_length = 2.5
+'''
+
+class SearchResult(TypedDict):
+    doc_id: str
+    title: str
+    snippet: str
     
 @dataclass
 class Tool_DESC:
@@ -40,3 +67,5 @@ class AgentResult:
 class ToolResult:
     content: str
     status: Literal["success", "not exist", "参数错误"]
+    
+    

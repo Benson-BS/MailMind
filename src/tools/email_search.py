@@ -8,21 +8,7 @@ from math import log1p
 from src.tools.tokenizer import tokenize
 from src.config.agent_types import Email
 from typing import List
-@dataclass
-class BM25Index:
-    postings: dict[str, list[tuple[int, int]]]
-    lengths: list[int]
-    average_length: float
-'''
-docs = ["apple apple banana", "banana orange"]
-postings = {
-    "apple": [(0, 2)],
-    "banana": [(0, 1), (1, 1)],
-    "orange": [(1, 1)],
-}
-lengths = [3, 2]
-average_length = 2.5
-'''
+from config.agent_types import BM25Index
 
 
 def build_index(docs: list[str]) -> BM25Index:
