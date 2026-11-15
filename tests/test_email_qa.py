@@ -6,7 +6,7 @@ from src.config.model import client
 from src.tools.email_search import EmailSearchEngine
 from src.tools.email_qa import answer_email_question
 from src.tools.load_email import load_emails
-from src.tools.email_search import make_email_search
+
 
 def contains_answer(text: str, aliases: list[str]) -> bool:
     def normalize(value: str) -> str:
@@ -30,7 +30,7 @@ def test_email_qa_live():
     for item in gold:
         calls = 0
         returned_ids: set[str] = set()
-        result = answer_email_question(item["quenstion"], engine.search, client)
+        result = answer_email_question(item["question"], engine.search, client)
 
         assert calls <= 3, f'{item["id"]}: 搜索了 {calls} 次'
         assert isinstance(result, dict)

@@ -56,7 +56,7 @@ class EmailSearchEngine():
             email["subject"] + "\n" + email["body"]
             for email in archive
         ]
-        self.index = build_index(archive)
+        self.index = build_index(docs)
         
     def search(self, query: str, k: int) -> list[Email]:
         '''
