@@ -1,5 +1,5 @@
 from src.tools.load_docs import load_docs
-from src.config.agent_types import BM25Index, SearchResult 
+from src.config.agent_types import BM25Index, SearchResult, DocWindow
 from collections import defaultdict, Counter
 from src.tools.tokenizer import tokenize
 from typing import List
@@ -81,4 +81,33 @@ class DocEngine():
 
         return results
     
-    
+    def doc_read(self, doc_id: str, start_line: int = 1) -> DocWindow:
+        doc = next(
+            (item for item in self.docs if item["doc_id"] == doc_id),
+            None,
+        )
+        if doc is None:
+            raise LookupError(f"未知文档: {doc_id}")
+
+        lines = doc["text"].splitlines()
+        total_lines = len(lines)
+        if not 1 <= start_line <= total_lines:
+            raise ValueError(f"start_line 必须在 1 到 {total_lines} 之间")
+
+        selected = []
+        for line in lines[start_line - 1:]:#文档的行号是从1开始的
+            candidate = "\n".join([*selected, line])
+            if len(tokenize(candidate)) > 1500:
+                break
+            selected.append(line)
+
+        if not selected:
+            raise ValueError("起始行本身超过 1500 tokens，无法返回完整行")
+
+        return DocWindow(
+            doc_id=doc_id,
+            start_line=start_line,
+            end_line=start_line + len(selected) - 1,
+            total_lines=total_lines,
+            text="\n".join(selected),
+        )
