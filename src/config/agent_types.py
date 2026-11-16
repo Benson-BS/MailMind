@@ -68,4 +68,16 @@ class ToolResult:
     content: str
     status: Literal["success", "not exist", "参数错误"]
     
-    
+@dataclass
+class TerminalResult:
+    stdout: str = ""
+    stderr: str = ""
+    exit_code: int | None = None  # None if the command was rejected or timed out
+    timed_out: bool = False
+    rejected: bool = False  # True if the allowlist check refused the command, or there is no shell
+    reason: str = ""  # why it was rejected or killed; "" otherwise
+'''
+正常运行结束：`rejected=False`、`timed_out=False`，`exit_code` 是数字；即使这个数字非零，命令也确实运行过。
+超时：`timed_out=True`、`exit_code=None`，`reason` 说明超时；`stdout` 和 stderr 仍可能包含超时前已经产生的内容。
+被拒绝：`rejected=True`、`exit_code=None`，`reason` 说明拒绝原因；命令没有运行，所以输出通常为空。
+'''
