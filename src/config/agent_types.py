@@ -56,7 +56,7 @@ class Tool_DESC:
 class AgentConfig:
     max_turns: int = 20
     context_budget: int = 16_000
-    workspace: Optional[Path] = None
+    workspace: Path | None = Path("./agent_workspace")
     terminal_timeout: float = 10.0
     
 #这里返回的是agent的一轮对话的结果，其中包含多次模型和工具的调用
