@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal, Callable, Any, TypedDict, Optional
-
+from pathlib import Path
 
 class Email(TypedDict):
     """One email from data/emails/emails.jsonl, as a plain dict:
@@ -55,6 +55,9 @@ class Tool_DESC:
 @dataclass
 class AgentConfig:
     max_turns: int = 20
+    context_budget: int = 16_000
+    workspace: Optional[Path] = None
+    terminal_timeout: float = 10.0
     
 #这里返回的是agent的一轮对话的结果，其中包含多次模型和工具的调用
 @dataclass

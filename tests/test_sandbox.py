@@ -1,4 +1,4 @@
-from src.config.sand_box import run_terminal
+from config.sandbox import run_terminal
 
 
 

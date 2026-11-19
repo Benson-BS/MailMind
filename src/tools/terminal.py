@@ -7,6 +7,7 @@ class termial_tool():
         self.config = config
 
     def _limit_observation(
+        self,
         text: str,
         workspace: str,
         max_chars: int = 20_000,
@@ -27,9 +28,9 @@ class termial_tool():
             f"Full output was saved to {workspace}.\n"
             "Use grep, sed, head, or tail through run_terminal to inspect it.\n"
         )
-        output_dir = workspace / ".terminal_outputs"
+        output_dir = workspace / ".terminal_outputs.txt"
         with open(output_dir, "w", encoding='uft-8') as f:
-            f.write(str)
+            f.write(text)
         # 为提示文字和换行预留空间。
         remaining = max_chars - len(notice)
         head_size = max(0, remaining // 2)
