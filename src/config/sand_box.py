@@ -15,7 +15,7 @@ import tempfile
 import threading
 from dataclasses import dataclass
 from pathlib import Path
-
+from src.config.agent_types import TerminalResult
 from src.config import sandbox_windows
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -39,15 +39,6 @@ else:
     _SYSTEM_PATH = "/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin"
     _SHELL = "/bin/bash" if os.path.exists("/bin/bash") else "/bin/sh"
 
-
-@dataclass
-class TerminalResult:
-    stdout: str = ""
-    stderr: str = ""
-    exit_code: int | None = None  # None if the command was rejected or timed out
-    timed_out: bool = False
-    rejected: bool = False  # True if the allowlist check refused the command, or there is no shell
-    reason: str = ""  # why it was rejected or killed; "" otherwise
 
 
 def _simple_commands(cmd: str) -> list[str]:
