@@ -29,6 +29,18 @@ class Session():
             if turns > self.config.max_turns:
                 return AgentResult("已达到模型调用次数上限。", "max_turns", self.transcript.copy())
             turns += 1
+            if self.config.user is not None:
+                pending = self.config.user.pending_message()
+                if pending is not None:
+                    self.messages.append({
+                        "role": "user",
+                        "content": pending,
+                    })
+                    self.transcript.append({
+                        "type": "user",
+                        "content": pending,
+                    })
+                            
             messages = self.messages.copy()
             reply = self.lm(messages, self.tools)
             self.messages.append({"role": "assistant", "content": reply.content})
