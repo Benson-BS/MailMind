@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal, Callable, Any, TypedDict, Optional
 from pathlib import Path
 
@@ -84,3 +84,14 @@ class TerminalResult:
 超时：`timed_out=True`、`exit_code=None`，`reason` 说明超时；`stdout` 和 stderr 仍可能包含超时前已经产生的内容。
 被拒绝：`rejected=True`、`exit_code=None`，`reason` 说明拒绝原因；命令没有运行，所以输出通常为空。
 '''
+
+
+@dataclass
+class Approval:
+    approved: bool
+    reason: str = ""
+    
+@dataclass
+class ToolCall:
+    name: str
+    args: dict = field(default_factory=dict)
