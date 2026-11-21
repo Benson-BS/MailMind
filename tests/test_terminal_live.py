@@ -33,7 +33,6 @@ def make_live_session() -> Session:
     config = AgentConfig(
         max_turns=LIVE_MAX_TURNS,
         terminal_timeout=30.0,
-        workspace=None,
     )
 
     terminal = termial_tool(config)

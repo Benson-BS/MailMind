@@ -44,31 +44,37 @@ class termial_tool():
         )
         
     def __call__(self, cmd: str) -> str:
+        workspace = (
+            Path(self.config.workspace)
+            if self.config.workspace is not None
+            else sandbox.default_workspace()
+        )
+
         result = sandbox.run_terminal(
-                cmd,
-                workspace=self.config.workspace,
-                timeout=self.config.terminal_timeout,
-            )
-        
-        exit_code = "None" if result.exit_code is None else str(result.exit_code)
+            cmd,
+            workspace=workspace,
+            timeout=self.config.terminal_timeout,
+        )
+
+        exit_code = (
+            "None"
+            if result.exit_code is None
+            else str(result.exit_code)
+        )
+
         parts = [
             f"stdout:\n{result.stdout}",
             f"stderr:\n{result.stderr}",
             f"exit_code: {exit_code}",
         ]
 
-        
         if result.reason:
             parts.append(f"reason: {result.reason}")
-            
+
         str_result = "\n\n".join(parts)
-        if not result.rejected and not result.timed_out:
-            show = self._limit_observation(
-                str_result,
-                workspace=self.config.workspace,
-                max_chars = 20_000
-            )
-        else:
-            show = result
-            
-        return show
+
+        return self._limit_observation(
+            str_result,
+            workspace=workspace,
+            max_chars=20_000,
+        )

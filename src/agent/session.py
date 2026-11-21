@@ -49,7 +49,7 @@ class Session():
                         
                     #存储工具执行的结果
                     self.transcript.append({
-                        "type": "tool_result", "name": tool_call.name,
+                        "type": "tool_result", "name": tool_name,
                         "status": tool_result.status, "content": tool_result.content,
                     })
                     self.messages.append({"role": "user", "content": tool_result.content})
