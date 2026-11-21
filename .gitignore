@@ -3,3 +3,5 @@ data/
 __pycache__
 fixtures/
 agent_workspace/
+
+runs/

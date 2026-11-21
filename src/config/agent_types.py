@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Literal, Callable, Any, TypedDict, Optional, TYPE_CHECKING
 from pathlib import Path
@@ -16,6 +18,24 @@ class Email(TypedDict):
     date: str  # ISO 8601, UTC, e.g. "2001-05-14T23:39:00Z"
     subject: str
     body: str
+
+class UserIO:
+    """The three ways your agent reaches the human."""
+
+    def approve(self, call: ToolCall) -> Approval:
+        """Ask the user whether ``call`` may run. Used in confirm mode."""
+        raise NotImplementedError
+
+    def ask(self, question: str) -> str:
+        """Put the model's ask_user question to the user and return the answer."""
+        raise NotImplementedError
+
+    def pending_message(self) -> Optional[str]:
+        """A steering message the user sent while the agent was working, or
+        None. Call this before every model call; a returned message is
+        consumed (the next call returns None unless another arrived)."""
+        return None
+
 
 @dataclass
 class DocWindow:
