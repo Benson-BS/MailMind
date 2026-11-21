@@ -2,10 +2,11 @@ from src.config.agent_types import AgentConfig, Tool_DESC, AgentResult
 from typing import List
 from src.config.model import LLM
 from src.tools.register import Tool_Register
+import json
 class Session():
     def __init__(self, config: AgentConfig, list_tool_desc: List[Tool_DESC]):
         self.tool_register = Tool_Register(list_tool_desc)
-        self.list_tools = self.tool_register.tool_list
+        self.tools = self.tool_register.tool_list
         self.lm = LLM()
         self.config = config
         self.messages = []
@@ -27,14 +28,15 @@ class Session():
         while True:
             if turns > self.config.max_turns:
                 return AgentResult("已达到模型调用次数上限。", "max_turns", self.transcript.copy())
+            truns += 1
             messages = self.messages.copy()
             reply = self.lm(messages, self.tools)
-            self.messages.append({"role": "user", "content": reply.content})
+            self.messages.append({"role": "assistant", "content": reply.content})
             self.transcript.append({"status": "assistant", "content": reply.content})
             if reply.tool_calls:
                 for tool_call in reply.tool_calls:
                     tool_name = tool_call.function.name
-                    tool_param = tool_call.function.arguments
+                    tool_param = json.loads(tool_call.function.arguments)
                     
                     #将工具执行的过程
                     self.transcript.append({

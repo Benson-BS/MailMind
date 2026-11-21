@@ -20,7 +20,6 @@ class Tool_Register():
                 "parameters": {
                     "type": "object",
                     "properties": tool_desc.parameters,
-                    "required": ["location"]
                 }
             }
         }

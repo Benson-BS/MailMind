@@ -9,7 +9,7 @@ class termial_tool():
     def _limit_observation(
         self,
         text: str,
-        workspace: str,
+        workspace: Path,
         max_chars: int = 20_000,
     ) -> str:
         """
@@ -29,7 +29,7 @@ class termial_tool():
             "Use grep, sed, head, or tail through run_terminal to inspect it.\n"
         )
         output_dir = workspace / ".terminal_outputs.txt"
-        with open(output_dir, "w", encoding='uft-8') as f:
+        with open(output_dir, "w", encoding='utf-8') as f:
             f.write(text)
         # 为提示文字和换行预留空间。
         remaining = max_chars - len(notice)
