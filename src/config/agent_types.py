@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
-from typing import Literal, Callable, Any, TypedDict, Optional
+from typing import Literal, Callable, Any, TypedDict, Optional, TYPE_CHECKING
 from pathlib import Path
-from src.config.user import UserIO
+if TYPE_CHECKING:
+    from src.config.user import UserIO
 
 class Email(TypedDict):
     """One email from data/emails/emails.jsonl, as a plain dict:

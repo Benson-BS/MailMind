@@ -3,8 +3,11 @@ from typing import List
 from src.config.model import LLM
 from src.tools.register import Tool_Register
 import json
+from src.tools.ask_user import create_ask_user_tool
 class Session():
     def __init__(self, config: AgentConfig, list_tool_desc: List[Tool_DESC]):
+        if config.user is not None:
+            list_tool_desc.append(create_ask_user_tool(config.user))
         self.tool_register = Tool_Register(list_tool_desc)
         self.tools = self.tool_register.tool_list
         self.lm = LLM()
