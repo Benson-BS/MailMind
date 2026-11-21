@@ -1,4 +1,4 @@
-from config import sandbox
+from src.config import sandbox
 from src.config.agent_types import AgentConfig, Tool_DESC
 from pathlib import Path
 
