@@ -1,5 +1,5 @@
 from typing import List
-from config.agent_types import Tool_DESC, ToolResult
+from src.config.agent_types import Tool_DESC, ToolResult
 from jsonschema import validate
 from jsonschema import ValidationError
 class Tool_Register():

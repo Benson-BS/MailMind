@@ -28,7 +28,7 @@ class Session():
         while True:
             if turns > self.config.max_turns:
                 return AgentResult("已达到模型调用次数上限。", "max_turns", self.transcript.copy())
-            truns += 1
+            turns += 1
             messages = self.messages.copy()
             reply = self.lm(messages, self.tools)
             self.messages.append({"role": "assistant", "content": reply.content})
