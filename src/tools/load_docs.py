@@ -1,4 +1,7 @@
-DOCS_DIR = 'data/docs'
+from pathlib import Path
+
+
+DOCS_DIR = Path("data/docs")
 
 
 

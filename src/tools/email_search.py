@@ -8,7 +8,7 @@ from math import log1p
 from src.tools.tokenizer import tokenize
 from src.config.agent_types import Email
 from typing import List
-from config.agent_types import BM25Index
+from src.config.agent_types import BM25Index
 
 
 def build_index(docs: list[str]) -> BM25Index:
