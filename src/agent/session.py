@@ -19,10 +19,11 @@ class Session():
 
         if config.user is not None:
             list_tool_desc.append(create_ask_user_tool(config.user))
-        self.tool_register = Tool_Register(list_tool_desc)
+        self.config = config
+        self.tool_register = Tool_Register(list_tool_desc, user=config.user)
         self.tools = self.tool_register.tool_list
         self.lm = LLM()
-        self.config = config
+        
         self.messages = []
         self.transcript = []
         self.system_prompt = (
