@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-
 from src.config.agent_types import AgentConfig, Tool_DESC
 from src.config.model import client
 from src.tools.doc_engine import DocEngine
@@ -24,30 +22,18 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
     email_search = EmailSearchEngine(emails)
     doc_engine = DocEngine()
 
-    def as_json(value: object) -> str:
-        return json.dumps(value, ensure_ascii=False, default=str)
+    def search_emails(query: str, k: int = 5):
+        return email_search.search(query, k)
 
-    def search_emails(query: str, k: int = 5) -> str:
-        return as_json(email_search.search(query, k))
-
-    def read_email(email_id: str) -> str:
-        return as_json(email_reader.read(email_id))
-
-    def classify_email_by_id(email_id: str) -> str:
-        return as_json(classify_email(email_reader.read(email_id), client))
+    def classify_email_by_id(email_id: str) -> dict:
+        return classify_email(email_reader.read(email_id), client)
 
     def create_daily_digest(email_ids: list[str]) -> str:
         selected = [email_reader.read(email_id) for email_id in email_ids]
         return daily_digest(selected, client)
 
-    def ask_about_emails(question: str) -> str:
-        return as_json(answer_email_question(question, email_search, client))
-
-    def search_docs(query: str, k: int = 5) -> str:
-        return as_json(doc_engine.docs_search(query, k))
-
-    def read_doc(doc_id: str, start_line: int = 1) -> str:
-        return as_json(doc_engine.doc_read(doc_id, start_line))
+    def ask_about_emails(question: str) -> dict:
+        return answer_email_question(question, email_search, client)
 
     return [
         Tool_DESC(
@@ -91,7 +77,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                     "description": "Email ID, for example em-00001.",
                 }
             },
-            func=read_email,
+            func=email_reader.read,
             read_only=True,
         ),
         Tool_DESC(
@@ -145,7 +131,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                     "default": 5,
                 },
             },
-            func=search_docs,
+            func=doc_engine.docs_search,
             read_only=True,
         ),
         Tool_DESC(
@@ -162,7 +148,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                     "default": 1,
                 },
             },
-            func=read_doc,
+            func=doc_engine.doc_read,
             read_only=True,
         ),
     ]
