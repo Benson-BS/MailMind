@@ -5,7 +5,18 @@ from src.tools.register import Tool_Register
 import json
 from src.tools.ask_user import create_ask_user_tool
 class Session():
-    def __init__(self, config: AgentConfig, list_tool_desc: List[Tool_DESC]):
+    def __init__(
+        self,
+        config: AgentConfig,
+        list_tool_desc: List[Tool_DESC] | None = None,
+    ):
+        if list_tool_desc is None:
+            from src.tools.build_tools import build_tools
+
+            list_tool_desc = build_tools(config)
+        else:
+            list_tool_desc = list(list_tool_desc)
+
         if config.user is not None:
             list_tool_desc.append(create_ask_user_tool(config.user))
         self.tool_register = Tool_Register(list_tool_desc)
@@ -70,4 +81,4 @@ class Session():
                     self.messages.append({"role": "user", "content": tool_result.content})
             else:
                 return AgentResult(reply.content or "模型没有提供答案。",
-                                       "done", self.transcript.copy())    
+                                       "done", self.transcript.copy())

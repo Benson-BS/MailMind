@@ -20,4 +20,5 @@ def create_ask_user_tool(user: UserIO) -> Tool_DESC:
             }
         },
         func=ask_user,
+        read_only=True,
     )

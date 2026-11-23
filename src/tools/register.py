@@ -2,6 +2,7 @@ from typing import List
 from src.config.agent_types import Tool_DESC, ToolResult
 from jsonschema import validate
 from jsonschema import ValidationError
+import json
 class Tool_Register():
     def __init__(self, list_tool_desc: List[Tool_DESC] | None = None):
         self.tool_list: List[dict] = []
@@ -40,4 +41,6 @@ class Tool_Register():
         
         #执行
         tool_result = tool.func(**tool_parameters)
+        if not isinstance(tool_result, str):
+            tool_result = json.dumps(tool_result, ensure_ascii=False, default=str)
         return ToolResult(content = tool_result, status='success')

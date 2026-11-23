@@ -72,6 +72,7 @@ class Tool_DESC:
     description: str
     parameters: dict
     func: Callable[..., Any]
+    read_only: bool = True
 
 
 @dataclass
