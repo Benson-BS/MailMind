@@ -75,6 +75,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                 }
             },
             func=terminal,
+            read_only=False,
         ),
         Tool_DESC(
             name="search_emails",
@@ -91,6 +92,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                 },
             },
             func=search_emails,
+            read_only=True,
         ),
         Tool_DESC(
             name="read_email",
@@ -102,6 +104,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                 }
             },
             func=read_email,
+            read_only=True,
         ),
         Tool_DESC(
             name="classify_email_priority",
@@ -115,6 +118,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                 }
             },
             func=classify_email_by_id,
+            read_only=True,
         ),
         Tool_DESC(
             name="create_daily_email_digest",
@@ -129,6 +133,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                 }
             },
             func=create_daily_digest,
+            read_only=True,
         ),
         Tool_DESC(
             name="answer_email_question",
@@ -142,6 +147,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                 }
             },
             func=ask_about_emails,
+            read_only=True,
         ),
         Tool_DESC(
             name="search_docs",
@@ -158,6 +164,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                 },
             },
             func=search_docs,
+            read_only=True,
         ),
         Tool_DESC(
             name="read_doc",
@@ -174,6 +181,7 @@ def build_tools(config: AgentConfig) -> list[Tool_DESC]:
                 },
             },
             func=read_doc,
+            read_only=True,
         ),
     ]
 
