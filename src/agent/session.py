@@ -1,4 +1,4 @@
-from src.config.agent_types import AgentConfig, Tool_DESC, AgentResult
+from src.config.agent_types import AgentConfig, Tool_DESC, AgentResult, ToolCall, ToolResult, Tool_DESC
 from typing import List
 from src.config.model import LLM
 from src.tools.register import Tool_Register

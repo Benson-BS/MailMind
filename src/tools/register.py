@@ -25,6 +25,13 @@ class Tool_Register():
             }
         }
 
+    
+    def get(self, tool_name: str) -> Tool_DESC | None:
+        return self.tool_map.get(tool_name)
+    
+    
+    
+    
     def execute(self, tool_name: str, tool_parameters: dict) -> ToolResult:
         #找配置
         tool = self.tool_map.get(tool_name) 

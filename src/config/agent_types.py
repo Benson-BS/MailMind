@@ -94,7 +94,7 @@ class AgentResult:
 @dataclass
 class ToolResult:
     content: str
-    status: Literal["success", "not exist", "参数错误"]
+    status: Literal["success", "not exist", "参数错误", "denied"]
     
 @dataclass
 class TerminalResult:
