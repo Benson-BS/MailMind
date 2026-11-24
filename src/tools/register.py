@@ -68,11 +68,11 @@ class Tool_Register():
             validate(instance=tool_parameters, schema=schema)
         except ValidationError as exc:
             return ToolResult(content=exc.message, status="参数错误")
-        
+        #如果是可以写的工具，需要问user是否允许执行
         denial = self._request_approval(tool, tool_parameters)
         if denial is not None:
             return denial
-        
+        #返回的结果是TollResult的格式
         #执行
         tool_result = tool.func(**tool_parameters)
         if not isinstance(tool_result, str):
