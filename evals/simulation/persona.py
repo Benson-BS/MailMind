@@ -61,18 +61,18 @@ class SessionSpec:
 
 @dataclass
 class Persona:
-    id: str
-    category: str
-    role: str
-    disposition: str
-    sessions: list[SessionSpec]
-    rubric: list[str]
-    knowledge: list[str] = field(default_factory=list)
-    mode: str = "auto"
-    deny_rules: tuple[str, ...] = ()
-    approval_policy: str = ""
-    approval_overrides: list[Override] = field(default_factory=list)
-    checks: list[dict] = field(default_factory=list)
+    id: str  # 用例的唯一标识，例如 doc-incident-severity
+    category: str  # 用例类别，例如 doc_lookup（文档查询）
+    role: str  # 模拟用户的身份和背景
+    disposition: str  # 模拟用户的说话风格和互动习惯
+    sessions: list[SessionSpec]  # 按顺序运行的会话配置，每场会话都有自己的目标
+    rubric: list[str]  # 交给裁判模型判断的评分标准
+    knowledge: list[str] = field(default_factory=list)  # 模拟用户事先知道的事实
+    mode: str = "auto"  # 工具审批模式，auto 为自动审批，confirm 为确认模式
+    deny_rules: tuple[str, ...] = ()  # 拒绝执行匹配这些正则表达式的终端命令
+    approval_policy: str = ""  # 模拟用户判断是否批准工具调用时参考的规则
+    approval_overrides: list[Override] = field(default_factory=list)  # 匹配时直接批准或拒绝的规则
+    checks: list[dict] = field(default_factory=list)  # 由代码执行的检查，例如回复是否包含指定关键词
 
 
 def parse_persona(data: dict, source: str = "persona") -> Persona:

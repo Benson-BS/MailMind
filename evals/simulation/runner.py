@@ -1,17 +1,14 @@
-"""The conversation runner (course-provided).
+"""课程提供的会话运行器。
 
-``run_persona`` plays one persona against your agent and scores the result:
+``run_persona`` 运行模拟用户与智能体的对话，并对结果评分。
 
-1. For each of the persona's sessions it builds an ``AgentConfig`` and calls
-   ``make_session(config)`` to get a fresh agent session. Sessions of one
-   persona share ``memory_dir`` and nothing else.
-2. It alternates: the persona writes a message, ``session.send(message)``
-   returns the agent's reply, the persona reads it. The session ends when
-   the persona says its goal is met, gives up, or has used its user turns.
-3. It runs the persona's programmatic checks and then the judge.
+1. 为用例中的每场会话构建 ``AgentConfig``，调用 ``make_session(config)``
+   创建新的智能体会话。同一用例的各场会话共用 ``memory_dir``，各自使用独立的工作目录。
+2. 模拟用户发出消息，通过 ``session.send(message)`` 获取智能体的回复，
+   再读取回复。模拟用户认为目标已达成、选择放弃或用完发言轮次时，会话结束。
+3. 运行用例配置的程序化检查，再由裁判模型评分。
 
-A conversation succeeds only if the agent did not raise, every check
-passes, and the judge passes.
+评估通过需要智能体正常运行、所有检查通过，并且裁判模型判定通过。
 """
 
 from __future__ import annotations
@@ -34,29 +31,30 @@ from .persona import Persona
 from .persona_user import PersonaUser
 from .record import ConversationRecord, JudgeResult, SessionRecord
 
-# The agent limits used for every evaluation conversation.
-EVAL_MAX_TURNS = 20  # model calls per user message
-EVAL_CONTEXT_BUDGET = 16_000  # tokens in any one model call
+# 所有评估会话共用的智能体运行上限。
+EVAL_MAX_TURNS = 20  # 每条用户消息的模型调用次数上限
+EVAL_CONTEXT_BUDGET = 16_000  # 单次模型调用的上下文令牌预算
 
-# Settings of the simulated-user model and the judge model. Both run at the
-# provider's default sampling (the course models do not take a temperature);
-# the cache makes a repeat of an unchanged conversation deterministic. The
-# token limits include a reasoning model's hidden reasoning tokens.
+# 模拟用户模型和裁判模型的设置。模型拒绝 temperature 参数时，使用服务商的默认采样设置。
+# 对话内容相同且命中缓存时，会复用先前的模型回复。令牌上限包含模型的隐藏推理令牌。
 USER_MAX_TOKENS = 1000
 JUDGE_MAX_TOKENS = 2500
 
 
 def eval_salt() -> str:
-    """CS329Z_EVAL_SALT: a string mixed into the cache keys of the agent and
-    persona models. Set it to a new value to repeat a run without the cache,
-    for example to see how much the results vary from run to run."""
+    """读取参与评估模型缓存键计算的 ``CS329Z_EVAL_SALT``。
+
+    设置一个新的值可生成新的缓存键，用来比较多次评估之间的结果差异。
+    """
     return os.environ.get("CS329Z_EVAL_SALT", "")
 
 
 class RetryingLM:
-    """An LM that, when a reply is cut off at ``max_tokens``, calls once more
-    with double the budget and then settles for the text it got. Used for
-    the simulated user and the judge, whose replies are short by design."""
+    """为模拟用户和裁判模型处理短回复被截断的情况。
+
+    回复因达到 ``max_tokens`` 被截断时，将令牌预算加倍并重试一次。
+    如果重试仍然被截断，就返回已生成的文本。
+    """
 
     def __init__(self, role: str, *, max_tokens: int, salt: str = "", tag: str) -> None:
         self.lm = LM(role, max_tokens=max_tokens, salt=salt, tag=tag)
@@ -78,8 +76,7 @@ class RetryingLM:
 
 
 def make_user_lm(persona: Persona) -> RetryingLM:
-    """The model that plays ``persona``. The salt gives each persona its own
-    cache entries."""
+    """创建扮演 ``persona`` 的模型，用例 ID 参与缓存键计算以区分各用例。"""
     return RetryingLM(
         "user",
         max_tokens=USER_MAX_TOKENS,
@@ -105,7 +102,7 @@ def build_config(user: PersonaUser, memory_dir: Path, workspace: Path) -> Evalua
 
 
 def _make_workspace(path: Path) -> Path:
-    """Prepare a session-local corpus for terminal access."""
+    """在会话的工作目录中准备供终端读取的语料。"""
     path.mkdir(parents=True)
     if sandbox.EMAILS_PATH.is_file():
         archive = path / "emails.jsonl"
@@ -116,7 +113,7 @@ def _make_workspace(path: Path) -> Path:
 
 
 def _usage(lms: Sequence) -> dict:
-    """Combined usage of several LM objects."""
+    """汇总多个语言模型对象的用量。"""
     total = {"calls": 0, "cached_calls": 0, "cost_usd": 0.0, "cost_untracked": False}
     for lm in lms:
         usage = lm.usage() if hasattr(lm, "usage") else {}
@@ -133,12 +130,11 @@ def converse(
     workdir: Optional[Path] = None,
     memory_out: Optional[Path] = None,
 ) -> ConversationRecord:
-    """Run every session of ``persona`` and return the unscored record.
+    """运行 ``persona`` 的所有会话，返回尚未评分的记录。
 
-    An exception raised by the agent ends the conversation and is stored in
-    ``record.error``. Two exceptions are passed on instead, because they are
-    not failures of one conversation: ``NotImplementedError`` (the adapter is
-    still a stub) and ``BudgetExceeded`` (the spend cap was reached).
+    智能体抛出一般异常时，结束对话并将错误保存到 ``record.error``。
+    ``NotImplementedError`` 表示适配器尚未实现，``BudgetExceeded`` 表示达到费用上限。
+    这两类异常会继续抛给调用方。
     """
     record = ConversationRecord(persona_id=persona.id, category=persona.category)
     user = PersonaUser(persona, user_lm)
@@ -172,7 +168,7 @@ def converse(
             if record.error:
                 break
     finally:
-        if memory_out is not None:  # keep what the agent stored, for inspection
+        if memory_out is not None:  # 导出智能体保存的记忆，供后续检查
             shutil.rmtree(memory_out, ignore_errors=True)
             shutil.copytree(memory_dir, memory_out)
         shutil.rmtree(root, ignore_errors=True)
@@ -180,7 +176,7 @@ def converse(
 
 
 def score(persona: Persona, record: ConversationRecord, judge_lm: Callable) -> ConversationRecord:
-    """Fill in ``record.checks``, ``record.judge`` and ``record.success``."""
+    """填写记录的检查结果、裁判结果和通过状态（``checks``、``judge``、``success``）。"""
     record.checks = run_checks(record, persona.checks)
     if record.error:
         record.judge = JudgeResult(False, "Not judged: the agent raised an exception.", "")
@@ -200,16 +196,15 @@ def run_persona(
     workdir: Optional[Path] = None,
     memory_out: Optional[Path] = None,
 ) -> ConversationRecord:
-    """Play ``persona`` against the agent and score the conversation.
+    """运行 ``persona`` 与智能体的对话，并对结果评分。
 
-    make_session: called once per session with the AgentConfig; returns an
-        object with ``send(message) -> AgentResult`` and ``transcript``.
-    user_lm, judge_lm: default to the pinned "user" and "judge" models.
-    agent_lms: the LM objects the agent uses in this conversation, if the
-        caller wants their usage in ``record.usage["agent"]``.
-    workdir: where the temporary memory and workspace directories are made.
-    memory_out: if given, the persona's memory_dir is copied there when the
-        conversation ends (the temporary directories are deleted).
+    - ``make_session`` 接收 ``AgentConfig``，每场会话调用一次，返回一个提供
+      ``send(message) -> AgentResult`` 方法和 ``transcript`` 属性的对象。
+    - ``user_lm`` 和 ``judge_lm`` 默认使用评估配置指定的模拟用户模型和裁判模型。
+    - ``agent_lms`` 是智能体在对话中使用的模型对象。传入这些对象可将其用量记录到
+      ``record.usage["agent"]``。
+    - ``workdir`` 指定临时记忆目录和会话工作目录的创建位置。
+    - ``memory_out`` 指定导出记忆的目录。会话结束后先复制 ``memory_dir``，再清理临时目录。
     """
     user_lm = user_lm or make_user_lm(persona)
     judge_lm = judge_lm or make_judge_lm(persona)
