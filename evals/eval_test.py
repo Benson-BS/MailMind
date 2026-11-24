@@ -18,7 +18,7 @@ from evals.simulation.evaluate import (
 from evals.simulation.persona import load_personas
 
 
-@pytest.mark.live
+
 def test_live_simulated_users(monkeypatch):
     monkeypatch.chdir(REPO_ROOT)
     personas = load_personas(PERSONA_DIR)
@@ -32,7 +32,7 @@ def test_live_simulated_users(monkeypatch):
     records = run_eval(
         personas,
         factory,
-        concurrency=int(os.getenv("CS329Z_EVAL_CONCURRENCY", DEFAULT_CONCURRENCY)),
+        concurrency=DEFAULT_CONCURRENCY,
         out_dir=out_dir,
     )
     table = format_table(records)
