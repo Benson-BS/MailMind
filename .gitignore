@@ -5,3 +5,6 @@ fixtures/
 agent_workspace/
 
 runs/
+.lm_cache/
+
+personas/

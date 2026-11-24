@@ -1,4 +1,5 @@
 from openai import OpenAI
+from openai.types.chat import ChatCompletionMessage
 import os
 from dotenv import load_dotenv
 from typing import List, Dict
@@ -17,7 +18,7 @@ class LLM():
     def __init__(self):
         self.lm = client
     
-    def __call__(self, messages: List[Dict], tools=None) -> str:
+    def __call__(self, messages: List[Dict], tools=None) -> ChatCompletionMessage:
         response = self.lm.chat.completions.create(
             model = "deepseek-chat",
             messages = messages,
