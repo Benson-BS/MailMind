@@ -58,6 +58,9 @@ class PersonaUser:
         
     def ask(self, quesntion: str):
         
+        
+        
+        
     def approval(call):
         
     def pending_message():
