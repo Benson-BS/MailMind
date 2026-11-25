@@ -28,13 +28,15 @@ class PersonaUser(UserIO):
             "只输出你要发给助手的消息正文。"
         )
         session_data = self.sessions[0]
+        self._steering = session_data.get("steering", [])
+        self._user_turn = 1  # The opening is the first user turn.
+        self._model_call = 0
         self.goal = session_data["goal"]
         self.chat_logs = [
             {"speaker": "user", "content": session_data["opening"]},
         ]
-        
-    def next_message(self, agent_reply: str):
-        
+
+    def next_message(self, agent_reply: str) -> str | None:
         self.chat_logs.append({"speaker": "agent", "content": agent_reply})
 
         prompt = (
@@ -49,13 +51,16 @@ class PersonaUser(UserIO):
             {"role": "system", "content": prompt},
             {"role": "user", "content": json.dumps(self.chat_logs, ensure_ascii=False)},
         ]
-        reply = self.llm(messages).strip()
-        
+        reply = (self.llm(messages).content or "").strip()
+        if not reply:
+            raise RuntimeError("The persona model returned an empty message.")
+
         if reply == "[END]":
             return None
-        
+
         self.chat_logs.append({"speaker": "user", "content": reply})
-        
+        self._user_turn += 1
+        self._model_call = 0
         return reply
         
     @override
@@ -73,7 +78,7 @@ class PersonaUser(UserIO):
             {"role": "system", "content": prompt},
             {"role": "user", "content": json.dumps(self.chat_logs, ensure_ascii=False)},
         ]
-        reply = self.llm(messages).strip()
+        reply = (self.llm(messages).content or "").strip()
         self.chat_logs.append({"speaker": "user", "content": reply})
         return reply
     
@@ -108,4 +113,16 @@ class PersonaUser(UserIO):
         return Approval(decision == "APPROVE", reason)
     
     @override
-    def pending_message(self) -> Optional[str]:
+    def pending_message(self) -> str | None:
+        self._model_call += 1
+
+        for entry in self._steering:
+            if (
+                entry["user_turn"] == self._user_turn
+                and entry["model_call"] == self._model_call
+            ):
+                message = entry["message"]
+                self.chat_logs.append({"speaker": "user", "content": message})
+                return message
+
+        return None
