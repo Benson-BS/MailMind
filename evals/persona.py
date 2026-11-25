@@ -1,7 +1,10 @@
 from evals.load_persona import Persona
 from src.config.model import LLM
 import json
-class PersonaUser:
+from src.config.agent_types import UserIO, ToolCall, Approval
+from typing import override
+
+class PersonaUser(UserIO):
     def __init__(self, persona: Persona):
         self.id = persona.id
         self.category = persona.category
@@ -55,12 +58,32 @@ class PersonaUser:
         
         return reply
         
+    @override
+    def ask(self, question: str) -> str:
         
-    def ask(self, quesntion: str):
+        self.chat_logs.append({"speaker": "agent", "content": question})
+        prompt = (
+            f"{self.system_prompt}\n\n"
+            f"本场会话的目标\n{self.goal}\n\n"
+            "对话的最后一条是助手刚提出的澄清问题。"
+            "只回答这个问题，提供相关的已知信息。"
+            "如果你不知道答案，就用自己的口吻说不知道。"
+        )
+        messages = [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": json.dumps(self.chat_logs, ensure_ascii=False)},
+        ]
+        reply = self.llm(messages).strip()
+        self.chat_logs.append({"speaker": "user", "content": reply})
+        return reply
+    
+    @override    
+    def approve(self, call: ToolCall) -> Approval:
         
         
         
         
-    def approval(call):
         
-    def pending_message():
+        
+    @override
+    def pending_message(self) -> Optional[str]:
