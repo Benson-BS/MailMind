@@ -2,7 +2,6 @@ from evals.load_persona import Persona
 from src.config.model import LLM
 import json
 from src.config.agent_types import UserIO, ToolCall, Approval
-from typing import override
 import re
 class PersonaUser(UserIO):
     def __init__(self, persona: Persona):
@@ -63,7 +62,6 @@ class PersonaUser(UserIO):
         self._model_call = 0
         return reply
         
-    @override
     def ask(self, question: str) -> str:
         
         self.chat_logs.append({"speaker": "agent", "content": question})
@@ -82,7 +80,6 @@ class PersonaUser(UserIO):
         self.chat_logs.append({"speaker": "user", "content": reply})
         return reply
     
-    @override    
     def approve(self, call: ToolCall) -> Approval:
         self.chat_logs.append({"speaker": "agent", "content": json.dumps({"tool": call.name, "args": call.args}, ensure_ascii=False)})
         policy = self.approval.get("policy")
@@ -112,7 +109,6 @@ class PersonaUser(UserIO):
         decision, reason = match.groups()
         return Approval(decision == "APPROVE", reason)
     
-    @override
     def pending_message(self) -> str | None:
         self._model_call += 1
 
